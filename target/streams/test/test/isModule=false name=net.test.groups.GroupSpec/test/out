@@ -1,0 +1,12 @@
+[0m[[0minfo[0m] [0m[32mGroupSpec:[0m[0m
+[0m[[0minfo[0m] [0m[32m- Groups can be generated from elements[0m[0m
+[0m[[0minfo[0m] [0m[32mA group[0m[0m
+[0m[[0minfo[0m] [0m[32m- should multiply elements together[0m[0m
+[0m[[0minfo[0m] [0m[32m- should calculate the order of elements[0m[0m
+[0m[[0minfo[0m] [0m[33m- should collect the orders of its elements !!! IGNORED !!![0m[0m
+[0m[[0minfo[0m] [0m[32m- should have an identity[0m[0m
+[0m[[0minfo[0m] [0m[32m- should have subgroups[0m[0m
+[0m[[0minfo[0m] [0m[32m- can multiply with another group[0m[0m
+[0m[[0minfo[0m] [0m[32m- can find generators[0m[0m
+[0m[[0minfo[0m] [0m[32mAn element in a group[0m[0m
+[0m[[0minfo[0m] [0m[32m- should have an inverse[0m[0m

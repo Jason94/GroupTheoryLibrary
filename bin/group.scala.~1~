@@ -1,0 +1,102 @@
+package net.groups
+
+import scala.collection.immutable.HashMap
+
+case class Group[T](val elts: Set[T], val op: (T,T) => T) {
+	lazy val identity: T = elts.find { g =>
+		orderOf(g) == 1
+	}.get
+
+	lazy val inverse: Map[T,T] = {
+		var elts = this.elts
+		var inverses = HashMap[T,T]()
+
+		while(elts.size > 0) {
+			// Pick the first element left.
+			val elt = elts.head
+
+			// Search for its inverse.
+			val inv = elts.find(this.*(elt,_) == this.identity).get
+
+			// Register the inverse and remove both elements from elts.
+			if(elt == inv) {
+				inverses = inverses + (elt -> inv)
+				elts = elts.filterNot(_ == elt)
+			} else {
+				inverses = inverses + (elt -> inv) + (inv -> elt)
+				elts = elts.filterNot(g => g == elt || g == inv)
+			}
+		}
+
+		inverses
+	}
+
+	lazy val orderOf: Map[T,Int] = {
+		// Calculate the order of each element, using the fact that its order is the number of times
+		// it takes to multiply back to itself minus 1.
+		elts.foldLeft(Map[T,Int]()) { (map, g) =>
+			var h = *(g,g)
+			var i = 1
+
+			while(h != g) {
+				h = *(h,g)
+				i += 1
+			}
+
+			map + (g -> i)
+		}
+	}
+
+	lazy val subgroups: Set[Group[T]] = {
+		// First find all of the sets of elements, the lengths of which divide the order of the group.
+		val possibleN: Set[Int] = (1 to elts.size).toSet.filter(n => elts.size % n == 0)
+		/// Do a few optimizations: ///
+		// 1. A subrgoup cannot contain an element higher than its order.
+		var possibles: Set[Set[T]] = possibleN.map { n =>
+			elts.filter(orderOf(_) <= n).subsets(n).toSet
+		}.flatten
+		// 2. Every subgroup must contain the identity.
+		possibles = possibles filter { possElts =>
+			possElts.contains(identity)
+		}
+
+		/// Only select those possibles that satisfy the two-step subgroup test. ///
+
+		// Check for inverses.
+		possibles = possibles filter { possSbgrp: Set[T] =>
+			var passes = true
+			val it = possSbgrp.iterator
+
+			while(passes && it.hasNext) {
+				val g = it.next
+
+				passes = possSbgrp.contains(inverse(g))
+			}
+
+			passes
+		}
+
+		// Check for closure.
+		possibles = possibles filter { possSbgrp: Set[T] =>
+			var passes = true
+			val it1 = possSbgrp.iterator
+
+			while(passes && it1.hasNext) {
+				val a = it1.next
+				val it2 = possSbgrp.iterator
+
+				while(passes && it2.hasNext) {
+					val b = it2.next
+					val c = op(a, b)
+					passes = possSbgrp.contains(c)
+				}
+			}
+
+			passes
+		}
+
+		possibles.map(Group(_,op))
+	}
+
+	def *(a: T, b: T) = op(a,b)
+}
